@@ -15,7 +15,10 @@ public enum ErrorCode {
       ExceptionCode.CONSTRAINT_VIOLATION,
       "Violación de restricción de datos."
   ),
-  ;
+  TECHNOLOGY_NOT_FOUND("TECHNOLOGY-NOT-FOUND",
+      ExceptionCode.NOT_FOUND,
+      "No se encontró el tecnologia con id: "
+  );
 
   private final String fullErrorCode;
   private final ExceptionCode exceptionCode;

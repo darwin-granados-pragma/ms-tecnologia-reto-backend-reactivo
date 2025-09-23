@@ -2,8 +2,8 @@ package co.com.tecnologia.r2dbc.adapter;
 
 import co.com.tecnologia.model.error.ErrorCode;
 import co.com.tecnologia.model.exception.ConstraintException;
+import co.com.tecnologia.model.gateways.TechnologyRepository;
 import co.com.tecnologia.model.technology.Technology;
-import co.com.tecnologia.model.technology.gateways.TechnologyRepository;
 import co.com.tecnologia.r2dbc.entity.TechnologyEntity;
 import co.com.tecnologia.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.tecnologia.r2dbc.repository.TechnologyReactiveRepository;
@@ -47,7 +47,8 @@ public class TechnologyReactiveRepositoryAdapter extends
   }
 
   @Override
-  public Mono<Void> deleteAll() {
-    return super.repository.deleteAll();
+  public Mono<Boolean> existsById(String id) {
+    log.info("Validating existence of the technology by id: {}", id);
+    return super.repository.existsById(id);
   }
 }

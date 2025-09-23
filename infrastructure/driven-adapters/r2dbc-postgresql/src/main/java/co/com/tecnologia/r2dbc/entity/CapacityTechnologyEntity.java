@@ -11,19 +11,19 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter
-@Table(name = "tecnologia")
+@Table(name = "capacidad_tecnologias")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class TechnologyEntity {
+public class CapacityTechnologyEntity {
 
   @Id
-  @Column("id_tecnologia")
+  @Column("id_capacidad_tecnologia")
   private String id;
 
-  @Column("nombre")
-  private String name;
+  @Column("id_tecnologia")
+  private String idTechnology;
 
-  @Column("descripcion")
-  private String description;
+  @Column("id_capacidad")
+  private String idCapacity;
 }

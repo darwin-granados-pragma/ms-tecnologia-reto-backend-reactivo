@@ -4,8 +4,10 @@ import co.com.tecnologia.api.mapper.TechnologyRestMapper;
 import co.com.tecnologia.api.model.request.TechnologyCreateRequest;
 import co.com.tecnologia.model.technology.TechnologyCreate;
 import co.com.tecnologia.usecase.technology.TechnologyUseCase;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -41,5 +43,19 @@ public class TechnologyHandler {
                       .contentType(MediaType.APPLICATION_JSON)
                       .bodyValue(response));
             })));
+  }
+
+  public Mono<ServerResponse> validateTechnologies(ServerRequest serverRequest) {
+    log.info("Received request to validate technologies at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return serverRequest
+        .bodyToMono(new ParameterizedTypeReference<Set<String>>() {
+        })
+        .flatMap(useCase::validateTechnologies)
+        .then(ServerResponse
+            .noContent()
+            .build());
   }
 }
