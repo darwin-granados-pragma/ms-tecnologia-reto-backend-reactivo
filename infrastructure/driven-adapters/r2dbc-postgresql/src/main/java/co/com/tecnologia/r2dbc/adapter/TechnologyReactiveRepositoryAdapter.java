@@ -12,6 +12,7 @@ import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -50,5 +51,13 @@ public class TechnologyReactiveRepositoryAdapter extends
   public Mono<Boolean> existsById(String id) {
     log.info("Validating existence of the technology by id: {}", id);
     return super.repository.existsById(id);
+  }
+
+  @Override
+  public Flux<Technology> findTechnologiesByIdCapacity(String idCapacity) {
+    log.info("Retrieving technologies from capacity with id: {}", idCapacity);
+    return super.repository
+        .findTechnologiesByIdCapacity(idCapacity)
+        .map(this::toEntity);
   }
 }
