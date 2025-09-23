@@ -61,8 +61,9 @@ public class TechnologyRouterRest {
           )}
       )
   )
-  public RouterFunction<ServerResponse> routerFunction() {
-    return route(POST(PATH), technologyHandler::createTechnology).filter(
-        globalErrorWebFilter);
+  public RouterFunction<ServerResponse> technologyRouterFunction() {
+    return route(POST(PATH), technologyHandler::createTechnology)
+        .andRoute(POST(PATH.concat("/validate")), technologyHandler::validateTechnologies)
+        .filter(globalErrorWebFilter);
   }
 }
