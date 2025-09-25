@@ -73,7 +73,7 @@ public class TechnologyRouterRest {
       beanMethod = "validateTechnologies",
       operation = @Operation(operationId = "validateTechnologies",
           summary = "Validar tecnologías",
-          description = "Recibe lista de identificadores de la tecnologías",
+          description = "Recibe lista de identificadores de las tecnologías",
           requestBody = @RequestBody(required = true,
               content = @Content(mediaType = "application/json",
                   array = @ArraySchema(schema = @Schema(type = "String", example = "[id1, id2, id3]"

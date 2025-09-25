@@ -23,7 +23,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @RequiredArgsConstructor
 public class CapacityTechnologyRouterRest {
 
-  private static final String PATH = "/api/v1/capacities/{id}/technologies";
+  private static final String PATH = "/api/v1/capacity/{id}/technologies";
 
   private final CapacityTechnologyHandler technologyHandler;
   private final GlobalErrorWebFilter globalErrorWebFilter;
