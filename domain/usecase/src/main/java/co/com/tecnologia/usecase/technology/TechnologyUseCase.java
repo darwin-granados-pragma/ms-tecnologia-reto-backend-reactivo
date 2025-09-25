@@ -32,6 +32,14 @@ public class TechnologyUseCase {
         .then();
   }
 
+  public Flux<Technology> findTechnologiesByIdCapacity(String idCapacity) {
+    return repository
+        .findTechnologiesByIdCapacity(idCapacity)
+        .switchIfEmpty(Mono.error(new ObjectNotFoundException(ErrorCode.CAPACITY_NOT_FOUND,
+            idCapacity
+        )));
+  }
+
   private Mono<Void> validateTechnologyById(String id) {
     return repository
         .existsById(id)

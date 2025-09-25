@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -30,6 +31,7 @@ class TechnologyUseCaseTest {
 
   private TechnologyCreate technologyCreate;
   private Technology technology;
+  private String idCapacity;
 
   @BeforeEach
   void setUp() {
@@ -40,6 +42,7 @@ class TechnologyUseCaseTest {
         .name(technologyCreate.name())
         .description(technologyCreate.description())
         .build();
+    idCapacity = technology.getId();
   }
 
   @Test
@@ -62,13 +65,13 @@ class TechnologyUseCaseTest {
   }
 
   @Test
-  void validateTechnologies_ShouldCompleteWhenAllIdsExist() {
+  void shouldCompleteWhenAllIdsExist() {
     // Arrange
     Set<String> existingIds = Set.of("id-1", "id-2", "id-3");
     when(repository.existsById(anyString())).thenReturn(Mono.just(true));
 
     // Act
-    Mono<Void> result = useCase.validateTechnologies(existingIds);
+    var result = useCase.validateTechnologies(existingIds);
 
     // Assert
     StepVerifier
@@ -77,7 +80,7 @@ class TechnologyUseCaseTest {
   }
 
   @Test
-  void validateTechnologies_ShouldReturnErrorWhenOneIdDoesNotExist() {
+  void shouldReturnErrorWhenOneIdDoesNotExist() {
     // Arrange
     String invalidId = "invalid-id";
     String validId1 = "id-1";
@@ -93,7 +96,39 @@ class TechnologyUseCaseTest {
     when(repository.existsById(invalidId)).thenReturn(Mono.just(false));
 
     // Act
-    Mono<Void> result = useCase.validateTechnologies(idsToValidate);
+    var result = useCase.validateTechnologies(idsToValidate);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .expectError(ObjectNotFoundException.class)
+        .verify();
+  }
+
+  @Test
+  void shouldReturnFLuxTechnologies() {
+    // Arrange
+    when(repository.findTechnologiesByIdCapacity(idCapacity)).thenReturn(Flux.just(technology));
+
+    // Act
+    var result = useCase.findTechnologiesByIdCapacity(idCapacity);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .expectNextMatches(tech -> tech
+            .getName()
+            .equals(technology.getName()))
+        .verifyComplete();
+  }
+
+  @Test
+  void shouldThrowObjectNotFoundException_WhenCapacityNotFound() {
+    // Arrange
+    when(repository.findTechnologiesByIdCapacity(idCapacity)).thenReturn(Flux.empty());
+
+    // Act
+    var result = useCase.findTechnologiesByIdCapacity(idCapacity);
 
     // Assert
     StepVerifier
