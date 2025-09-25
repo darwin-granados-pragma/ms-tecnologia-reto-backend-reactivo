@@ -58,4 +58,20 @@ public class TechnologyHandler {
             .noContent()
             .build());
   }
+
+  public Mono<ServerResponse> getTechnologiesByIdCapacity(ServerRequest serverRequest) {
+    log.info("Request received to get the list of technologies by capacity: path={}, method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idCapacity = serverRequest.pathVariable("idCapacity");
+      return useCase
+          .findTechnologiesByIdCapacity(idCapacity)
+          .collectList()
+          .flatMap(technologies -> ServerResponse
+              .ok()
+              .bodyValue(technologies));
+    });
+  }
 }

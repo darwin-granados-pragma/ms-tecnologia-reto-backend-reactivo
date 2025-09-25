@@ -1,5 +1,6 @@
 package co.com.tecnologia.api.router;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -9,12 +10,16 @@ import co.com.tecnologia.api.handler.TechnologyHandler;
 import co.com.tecnologia.api.model.request.TechnologyCreateRequest;
 import co.com.tecnologia.api.model.response.TechnologyResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.RouterOperation;
+import org.springdoc.core.annotations.RouterOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,12 +31,14 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class TechnologyRouterRest {
 
   private static final String PATH = "/api/v1/tecnologia";
+  private static final String VALIDATE_TECHNOLOGIES = PATH + "/validate";
+  private static final String GET_TECHNOLOGIES_CAPACITY = "/api/v1/capacity/{idCapacity}/technologies";
 
   private final TechnologyHandler technologyHandler;
   private final GlobalErrorWebFilter globalErrorWebFilter;
 
   @Bean
-  @RouterOperation(method = RequestMethod.POST,
+  @RouterOperations({@RouterOperation(method = RequestMethod.POST,
       path = PATH,
       beanClass = TechnologyHandler.class,
       beanMethod = "createTechnology",
@@ -60,10 +67,58 @@ public class TechnologyRouterRest {
               )
           )}
       )
+  ), @RouterOperation(method = RequestMethod.POST,
+      path = VALIDATE_TECHNOLOGIES,
+      beanClass = TechnologyHandler.class,
+      beanMethod = "validateTechnologies",
+      operation = @Operation(operationId = "validateTechnologies",
+          summary = "Validar tecnologías",
+          description = "Recibe lista de identificadores de las tecnologías",
+          requestBody = @RequestBody(required = true,
+              content = @Content(mediaType = "application/json",
+                  array = @ArraySchema(schema = @Schema(type = "String", example = "[id1, id2, id3]"
+                  )
+                  )
+              )
+          ),
+          responses = {@ApiResponse(responseCode = "204", description = "Tecnologías verificadas"
+          ), @ApiResponse(responseCode = "404",
+              description = "Tecnologia no encontrada",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          )}
+      )
+  ), @RouterOperation(method = RequestMethod.GET,
+      path = GET_TECHNOLOGIES_CAPACITY,
+      beanClass = TechnologyHandler.class,
+      beanMethod = "getTechnologiesByIdCapacity",
+      operation = @Operation(operationId = "getTechnologiesByIdCapacity",
+          summary = "Obtener tecnologías por capacidad",
+          description = "Recibe el identificador de la capacidad y devuelve la lista de tecnologías asociadas a esa capacidad",
+          parameters = {@Parameter(name = "idCapacity",
+              in = ParameterIn.PATH,
+              required = true,
+              description = "Identificador único de la capacidad",
+              schema = @Schema(type = "string",
+                  format = "uuid",
+                  example = "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+              )
+          )},
+          responses = {@ApiResponse(responseCode = "200", description = "Tecnologías recuperadas"
+          ), @ApiResponse(responseCode = "404",
+              description = "Capacidad no encontrada",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class)
+              )
+          )}
+      )
+  )}
   )
   public RouterFunction<ServerResponse> technologyRouterFunction() {
     return route(POST(PATH), technologyHandler::createTechnology)
-        .andRoute(POST(PATH.concat("/validate")), technologyHandler::validateTechnologies)
+        .andRoute(POST(VALIDATE_TECHNOLOGIES), technologyHandler::validateTechnologies)
+        .andRoute(GET(GET_TECHNOLOGIES_CAPACITY), technologyHandler::getTechnologiesByIdCapacity)
         .filter(globalErrorWebFilter);
   }
 }

@@ -17,7 +17,11 @@ public enum ErrorCode {
   ),
   TECHNOLOGY_NOT_FOUND("TECHNOLOGY-NOT-FOUND",
       ExceptionCode.NOT_FOUND,
-      "No se encontró el tecnologia con id: "
+      "No se encontró la tecnologia con id: "
+  ),
+  CAPACITY_NOT_FOUND("CAPACITY-NOT-FOUND",
+      ExceptionCode.NOT_FOUND,
+      "No se encontró la capacidad con id: "
   );
 
   private final String fullErrorCode;
