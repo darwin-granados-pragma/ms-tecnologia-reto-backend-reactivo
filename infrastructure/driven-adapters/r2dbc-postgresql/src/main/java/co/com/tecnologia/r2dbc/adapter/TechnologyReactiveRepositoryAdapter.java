@@ -60,4 +60,17 @@ public class TechnologyReactiveRepositoryAdapter extends
         .findTechnologiesByIdCapacity(idCapacity)
         .map(this::toEntity);
   }
+
+  @Override
+  public Mono<Void> deleteById(String id) {
+    return super.repository
+        .deleteById(id)
+        .onErrorResume(error -> {
+          log.error("Cannot posible delete the technology with id: {} error message: {}",
+              id,
+              error.getMessage()
+          );
+          return Mono.empty();
+        });
+  }
 }

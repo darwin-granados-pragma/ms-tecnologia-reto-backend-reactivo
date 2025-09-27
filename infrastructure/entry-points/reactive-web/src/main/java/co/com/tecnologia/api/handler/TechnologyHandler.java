@@ -74,4 +74,19 @@ public class TechnologyHandler {
               .bodyValue(technologies));
     });
   }
+
+  public Mono<ServerResponse> deleteTechnologiesByIdCapacity(ServerRequest serverRequest) {
+    log.info("Received request to delete a capacity at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idCapacity = serverRequest.pathVariable("idCapacity");
+      return useCase
+          .deleteCapacityAndRelationsWithTechnologies(idCapacity)
+          .then(ServerResponse
+              .noContent()
+              .build());
+    });
+  }
 }

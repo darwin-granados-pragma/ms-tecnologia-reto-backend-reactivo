@@ -1,5 +1,6 @@
 package co.com.tecnologia.api.router;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -30,9 +31,11 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @RequiredArgsConstructor
 public class TechnologyRouterRest {
 
-  private static final String PATH = "/api/v1/tecnologia";
+  private static final String V1 = "/api/v1";
+  private static final String PATH = V1 + "/technology";
   private static final String VALIDATE_TECHNOLOGIES = PATH + "/validate";
-  private static final String GET_TECHNOLOGIES_CAPACITY = "/api/v1/capacity/{idCapacity}/technologies";
+  private static final String GET_TECHNOLOGIES_CAPACITY = V1 + "/capacity/{idCapacity}/technologies";
+  private static final String DELETE_TECHNOLOGIES = V1 + "/capacity/{idCapacity}";
 
   private final TechnologyHandler technologyHandler;
   private final GlobalErrorWebFilter globalErrorWebFilter;
@@ -113,12 +116,28 @@ public class TechnologyRouterRest {
               )
           )}
       )
+  ), @RouterOperation(method = RequestMethod.DELETE,
+      path = DELETE_TECHNOLOGIES,
+      beanClass = TechnologyHandler.class,
+      beanMethod = "deleteTechnologiesByIdCapacity",
+      operation = @Operation(operationId = "deleteTechnologiesByIdCapacity",
+          summary = "Eliminar tecnologías por capacidad",
+          description = "Recibe el identificador y elimina las tecnologías relacionadas a la capacidad.",
+          parameters = {@Parameter(in = ParameterIn.PATH,
+              description = "Identificador de la capacidad",
+              schema = @Schema(type = "String")
+          )},
+          responses = {@ApiResponse(responseCode = "204",
+              description = "Capacidad y tecnologías asociadas eliminadas correctamente"
+          )}
+      )
   )}
   )
   public RouterFunction<ServerResponse> technologyRouterFunction() {
     return route(POST(PATH), technologyHandler::createTechnology)
         .andRoute(POST(VALIDATE_TECHNOLOGIES), technologyHandler::validateTechnologies)
         .andRoute(GET(GET_TECHNOLOGIES_CAPACITY), technologyHandler::getTechnologiesByIdCapacity)
+        .andRoute(DELETE(DELETE_TECHNOLOGIES), technologyHandler::deleteTechnologiesByIdCapacity)
         .filter(globalErrorWebFilter);
   }
 }
