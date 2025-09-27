@@ -10,4 +10,6 @@ public interface TechnologyRepository {
   Mono<Boolean> existsById(String id);
 
   Flux<Technology> findTechnologiesByIdCapacity(String idCapacity);
+
+  Mono<Void> deleteById(String id);
 }

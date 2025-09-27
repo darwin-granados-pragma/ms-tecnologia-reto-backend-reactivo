@@ -3,16 +3,24 @@ package co.com.tecnologia.usecase.technology;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import co.com.tecnologia.model.exception.ObjectNotFoundException;
+import co.com.tecnologia.model.gateways.CapacityTechnologyRepository;
 import co.com.tecnologia.model.gateways.TechnologyRepository;
+import co.com.tecnologia.model.gateways.TransactionalGateway;
 import co.com.tecnologia.model.technology.Technology;
 import co.com.tecnologia.model.technology.TechnologyCreate;
+import co.com.tecnologia.model.technology.capacity.CapacityTechnology;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +33,11 @@ class TechnologyUseCaseTest {
 
   @Mock
   private TechnologyRepository repository;
+
+  @Mock
+  private CapacityTechnologyRepository capacityTechnologyRepository;
+  @Mock
+  private TransactionalGateway transactionalGateway;
 
   @InjectMocks
   private TechnologyUseCase useCase;
@@ -135,5 +148,59 @@ class TechnologyUseCaseTest {
         .create(result)
         .expectError(ObjectNotFoundException.class)
         .verify();
+  }
+
+  @Test
+  void delete_whenCapacityHasTechnologies_shouldDeleteAllRelations() {
+    // Arrange
+    var capacityTechnology1 = CapacityTechnology
+        .builder()
+        .id("ct-1")
+        .idCapacity(idCapacity)
+        .idTechnology("tech-1")
+        .build();
+    var capacityTechnology2 = CapacityTechnology
+        .builder()
+        .id("ct-2")
+        .idCapacity(idCapacity)
+        .idTechnology("tech-2")
+        .build();
+    var capacityTechnologies = List.of(capacityTechnology1, capacityTechnology2);
+
+    when(capacityTechnologyRepository.findAllByIdCapacity(idCapacity)).thenReturn(Flux.fromIterable(
+        capacityTechnologies));
+    when(capacityTechnologyRepository.deleteAll(capacityTechnologies)).thenReturn(Mono.empty());
+    when(repository.deleteById(anyString())).thenReturn(Mono.empty());
+    when(transactionalGateway.execute(ArgumentMatchers.<Mono<?>>any())).thenAnswer(invocation -> invocation.getArgument(
+        0));
+
+    // Act
+    var resultMono = useCase.deleteCapacityAndRelationsWithTechnologies(idCapacity);
+
+    // Assert
+    StepVerifier
+        .create(resultMono)
+        .expectComplete()
+        .verify();
+    verify(capacityTechnologyRepository, times(1)).deleteAll(capacityTechnologies);
+    verify(repository, times(1)).deleteById(capacityTechnology1.getIdTechnology());
+    verify(repository, times(1)).deleteById(capacityTechnology2.getIdTechnology());
+  }
+
+  @Test
+  void delete_whenCapacityHasNoTechnologies_shouldCompleteWithoutDeletions() {
+    // Arrange
+    when(capacityTechnologyRepository.findAllByIdCapacity(idCapacity)).thenReturn(Flux.empty());
+
+    // Act
+    var resultMono = useCase.deleteCapacityAndRelationsWithTechnologies(idCapacity);
+
+    // Assert
+    StepVerifier
+        .create(resultMono)
+        .expectComplete()
+        .verify();
+    verify(capacityTechnologyRepository, never()).deleteAll(any());
+    verify(repository, never()).deleteById(anyString());
   }
 }
