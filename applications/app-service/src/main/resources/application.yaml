@@ -72,4 +72,4 @@ spring:
       on-profile: prod
 logging:
   level:
-    com.persona: INFO
+    com.tecnologia: INFO
