@@ -52,4 +52,23 @@ class CapacityTechnologyUseCaseTest {
     verify(repository, times(3)).save(any(CapacityTechnology.class));
     verify(transactionalGateway, times(1)).execute(any());
   }
+
+  @Test
+  void shouldCountTechnologiesByIdCapacity() {
+    // Arrange
+    String idCapacity = "cap-01";
+    Long expectedCount = 3L;
+    when(repository.countByIdCapacity(idCapacity)).thenReturn(Mono.just(expectedCount));
+
+    // Act
+    Mono<Long> result = capacityTechnologyUseCase.countTechnologiesByIdCapacity(idCapacity);
+
+    // Assert
+    StepVerifier
+        .create(result)
+        .expectNext(expectedCount)
+        .verifyComplete();
+    verify(repository, times(1)).countByIdCapacity(idCapacity);
+  }
+
 }

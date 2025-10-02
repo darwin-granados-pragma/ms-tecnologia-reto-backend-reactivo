@@ -35,6 +35,7 @@ public class CapacityTechnologyReactiveRepositoryAdapter extends
 
   @Override
   public Flux<CapacityTechnology> findAllByIdCapacity(String idCapacity) {
+    log.info("Retrieving all Capacity-Technology by capacity id: {}", idCapacity);
     return super.repository
         .findAllByIdCapacity(idCapacity)
         .map(this::toEntity);
@@ -42,10 +43,17 @@ public class CapacityTechnologyReactiveRepositoryAdapter extends
 
   @Override
   public Mono<Void> deleteAll(List<CapacityTechnology> capacityTechnologyList) {
+    log.info("Deleting Capacity-Technology list");
     List<CapacityTechnologyEntity> list = capacityTechnologyList
         .stream()
         .map(this::toData)
         .toList();
     return super.repository.deleteAll(list);
+  }
+
+  @Override
+  public Mono<Long> countByIdCapacity(String idCapacity) {
+    log.info("Counting technologies for capacity with id: {}", idCapacity);
+    return super.repository.countByIdCapacity(idCapacity);
   }
 }

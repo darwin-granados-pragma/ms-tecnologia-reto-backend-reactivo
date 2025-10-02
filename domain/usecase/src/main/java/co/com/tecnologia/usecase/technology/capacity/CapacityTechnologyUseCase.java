@@ -18,6 +18,10 @@ public class CapacityTechnologyUseCase {
     return transactionalGateway.execute(getAssociationsToSave(data).then());
   }
 
+  public Mono<Long> countTechnologiesByIdCapacity(String idCapacity) {
+    return repository.countByIdCapacity(idCapacity);
+  }
+
   private Flux<CapacityTechnology> getAssociationsToSave(CapacityTechnologyCreate data) {
     return Flux
         .fromIterable(data.technologies())
