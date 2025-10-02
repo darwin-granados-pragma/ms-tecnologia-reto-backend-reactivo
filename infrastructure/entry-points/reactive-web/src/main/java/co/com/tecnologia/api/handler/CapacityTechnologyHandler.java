@@ -28,12 +28,28 @@ public class CapacityTechnologyHandler {
     return serverRequest
         .bodyToMono(new ParameterizedTypeReference<Set<String>>() {
         })
-        .flatMap(idTechnologies -> useCase.assignTechnologiesToCapacity(mapper
-            .toCapacityTechnologyCreate(idCapacity, idTechnologies
+        .flatMap(idTechnologies -> useCase.assignTechnologiesToCapacity(mapper.toCapacityTechnologyCreate(
+            idCapacity,
+            idTechnologies
         )))
         .then(ServerResponse
             .noContent()
             .build());
+  }
+
+  public Mono<ServerResponse> countTechnologiesByIdCapacity(ServerRequest serverRequest) {
+    log.info("Received request to count technologies by capacity at path={} method={}",
+        serverRequest.path(),
+        serverRequest.method()
+    );
+    return Mono.defer(() -> {
+      String idCapacity = serverRequest.pathVariable("id");
+      return useCase
+          .countTechnologiesByIdCapacity(idCapacity)
+          .flatMap(response -> ServerResponse
+              .ok()
+              .bodyValue(response));
+    });
   }
 
 }

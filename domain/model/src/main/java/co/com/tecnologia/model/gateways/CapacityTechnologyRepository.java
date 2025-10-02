@@ -13,4 +13,5 @@ public interface CapacityTechnologyRepository {
 
   Mono<Void> deleteAll(List<CapacityTechnology> capacityTechnologyList);
 
+  Mono<Long> countByIdCapacity(String idCapacity);
 }
